@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>国内加速npm的方法</title>
+    <url>/201910/%E5%9B%BD%E5%86%85%E5%8A%A0%E9%80%9Fnpm%E7%9A%84%E6%96%B9%E6%B3%95/</url>
+    <content><![CDATA[<div class="note info"><h3 id="使用阿里的-nmp-镜像加速"><a href="#使用阿里的-nmp-镜像加速" class="headerlink" title="使用阿里的 nmp 镜像加速"></a>使用阿里的 nmp 镜像加速</h3></div>
+<blockquote>
+<p>以下方法任选一种即可</p>
+</blockquote>
+<ul>
+<li><p>方法1：通过 <code>config</code> 命令</p>
+  <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> registry=https://registry.npm.taobao.org</span><br><span class="line">npm info underscore</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>方法2：命令行指定</p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">npm --registry https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>方法3：编辑 <code>~/.npmrc</code> 文件，加入以下文件</p>
+  <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">registry = https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>方法4：用 <code>cnpm install</code> 代替 <code>npm install</code></p>
+  <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>npm加速</tag>
+        <tag>npm镜像</tag>
+        <tag>cnpm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python多线程批量Ping主机IP的脚本</title>
+    <url>/201910/python-threading-ping/</url>
+    <content><![CDATA[<blockquote>
+<p>目的：通过写一个简单的脚本学习<code>Python</code>多线程的使用</p>
+</blockquote>
+<div class="note info"><h3 id="先编写一个-Ping-主机IP的脚本"><a href="#先编写一个-Ping-主机IP的脚本" class="headerlink" title="先编写一个 Ping 主机IP的脚本"></a>先编写一个 Ping 主机IP的脚本</h3></div>
+<p><code>ping_ip.py</code><br><figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录开始执行的时间</span></span><br><span class="line">start_time = time.time()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义用来 ping 的254 个 ip</span></span><br><span class="line">ip_list = [<span class="string">'10.3.1.'</span>+str(i) <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">255</span>)]  </span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> ip <span class="keyword">in</span> ip_list:</span><br><span class="line">    res = subprocess.call(<span class="string">'ping -n 2 -w 5 %s'</span> % ip,stdout=subprocess.PIPE)  <span class="comment"># linux 系统将 '-n' 替换成 '-c'</span></span><br><span class="line">    print(ip,<span class="literal">True</span> <span class="keyword">if</span> res == <span class="number">0</span> <span class="keyword">else</span> <span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'执行所用时间：%s'</span> % (time.time() - start_time))</span><br></pre></td></tr></table></figure></p>
+<div class="note info"><h3 id="改造成多线程的脚本"><a href="#改造成多线程的脚本" class="headerlink" title="改造成多线程的脚本"></a>改造成多线程的脚本</h3></div>
+<p><code>ping_threading.py</code><br><figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> queue <span class="keyword">import</span> Queue</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义工作线程</span></span><br><span class="line">WORD_THREAD = <span class="number">50</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将需要 ping 的 ip 加入队列</span></span><br><span class="line">IP_QUEUE = Queue() </span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">255</span>):</span><br><span class="line">    IP_QUEUE.put(<span class="string">'10.3.1.'</span>+str(i))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义一个执行 ping 的函数</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ping_ip</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> IP_QUEUE.empty():</span><br><span class="line">        ip = IP_QUEUE.get()</span><br><span class="line">        res = subprocess.call(<span class="string">'ping -n 2 -w 5 %s'</span> % ip,stdout=subprocess.PIPE)  <span class="comment"># linux 系统将 '-n' 替换成 '-c'</span></span><br><span class="line">        <span class="comment"># 打印运行结果</span></span><br><span class="line">        print(ip,<span class="literal">True</span> <span class="keyword">if</span> res == <span class="number">0</span> <span class="keyword">else</span> <span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    threads = []</span><br><span class="line">    start_time = time.time()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(WORD_THREAD):</span><br><span class="line">        thread = threading.Thread(target=ping_ip)</span><br><span class="line">        thread.start()</span><br><span class="line">        threads.append(thread)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> thread <span class="keyword">in</span> threads:</span><br><span class="line">        thread.join()</span><br><span class="line"></span><br><span class="line">    print(<span class="string">'程序运行耗时：%s'</span> % (time.time() - start_time))</span><br></pre></td></tr></table></figure></p>
+<div class="note info"><h3 id="运行效果对比"><a href="#运行效果对比" class="headerlink" title="运行效果对比"></a>运行效果对比</h3></div>
+<p>单线程的运行结果<br><img src="http://i2.51cto.com/images/blog/201805/24/13bf16e8ff38cebf929f6f9114eac634.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt></p>
+<p>50个线程的运行结果<br><img src="http://i2.51cto.com/images/blog/201805/24/d7093182af0d271f4668971b70b17a97.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt></p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>threading</tag>
+        <tag>多线程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>国内为何访问Github如此慢</title>
+    <url>/201910/%E5%9B%BD%E5%86%85%E4%B8%BA%E4%BD%95%E8%AE%BF%E9%97%AEGithub%E5%A6%82%E6%AD%A4%E6%85%A2/</url>
+    <content><![CDATA[<div class="note info"><h3 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h3></div>
+<p>GitHub在中国大陆访问速度慢的问题原因有很多，但最直接和最主要的原因是GitHub的分发加速网络的域名遭到DNS污染。</p>
+<p>由于GitHub的加速分发CDN域名assets-cdn.github.com遭到DNS污染，导致无法连接使用GitHub的加速分发服务器，才使得中国大陆访问速度很慢。</p>
+<div class="note info"><h3 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h3></div>
+<p><strong>通过修改Hosts解决污染问题</strong><br>一般的DNS问题都可以通过修改Hosts文件来解决，GitHub的CDN域名被污染问题也不例外，同样可以通过修改Hosts文件解决。</p>
+<p>将域名解析直接指向IP地址来绕过DNS的解析，以此解决污染问题。</p>
+<p><strong>如何修改Hosts</strong></p>
+<ol>
+<li><p>获取被污染域名的实际IP地址</p>
+<ul>
+<li>访问 <code>IPAddress.com</code> 使用 <code>IP Lookup</code> 工具获得这个域名的IP地址。</li>
+<li>得到的结果如下：  <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="number">192.30</span><span class="number">.253</span><span class="number">.112</span>      github.com</span><br><span class="line"><span class="number">151.101</span><span class="number">.185</span><span class="number">.194</span>     github.global.ssl.fastly.net</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>修改的Hosts文件<br> 将上述结果添加到系统 <code>hosts</code> 文件或者 git 的<code>hosts</code> 中的一个即可。<br> <strong>Windows 路径</strong></p>
+ <figure class="highlight c"><table><tr><td class="code"><pre><span class="line">C:\Windows\System32\drivers\etc</span><br><span class="line">C:\Program Files\Git\etc</span><br></pre></td></tr></table></figure>
+<p> <strong>Linux 路径</strong></p>
+ <figure class="highlight c"><table><tr><td class="code"><pre><span class="line">/etc/hosts</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<div class="note info"><h3 id="测试下载速度对比"><a href="#测试下载速度对比" class="headerlink" title="测试下载速度对比"></a>测试下载速度对比</h3></div>
+<ul>
+<li><p>修改前:  <code>10 KB/s</code><br><img src="https://i.loli.net/2018/08/11/5b6dc03b8f460.png" alt="sudu1"></p>
+</li>
+<li><p>修改后: <code>1.12 MB/s</code><br><img src="https://i.loli.net/2018/08/11/5b6dc04506138.png" alt="sudu2"></p>
+</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>GitHub加速</tag>
+        <tag>Github慢</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>免费DNS云解析加速国内外访问</title>
+    <url>/201910/%E5%85%8D%E8%B4%B9DNS%E4%BA%91%E8%A7%A3%E6%9E%90%E5%8A%A0%E9%80%9F%E5%9B%BD%E5%86%85%E5%A4%96%E8%AE%BF%E9%97%AE/</url>
+    <content><![CDATA[<div class="note info"><h3 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h3></div>
+<p>实现访问同一域名</p>
+<ul>
+<li>国内用户访问国内线路，国外用户访问国外线路</li>
+<li>电信用户访问电信线路，联通用户访问联通线路</li>
+</ul>
+<div class="note info"><h3 id="使用DNS云解析实现国内国外访问加速"><a href="#使用DNS云解析实现国内国外访问加速" class="headerlink" title="使用DNS云解析实现国内国外访问加速"></a>使用DNS云解析实现国内国外访问加速</h3></div>
+<p>对国内外线路进行智能解析，非常适合将网站放在 <code>github pages</code> 的伙伴们<br>既能解决国内时常无法访问的情况<br>还能解决google和百度搜索的很多问题</p>
+<p>这里我使用的是 <code>腾讯云</code>，其dns服务由 <code>DNSPod</code> 提供。</p>
+<ol>
+<li><p>首先在国外的 <code>github page</code> 和国内的 <code>coding page</code> 上分别部署自己的网站<br> 这里我使用 <code>hexo</code> 部署的，在站点 <code>_config.yml</code> 中做如下配置，运行 <code>hexo d -g</code> 就会将网站同时部署到两个仓库。<br> <img src="https://ws1.sinaimg.cn/large/992aea3dgy1fu6dm90ghdj20d3058wen.jpg" alt></p>
+</li>
+<li><p>登录<a href="https://cloud.tencent.com" target="_blank" rel="noopener"><code>腾讯云</code></a> 的域名控制台，添加你的域名解析，并在域名注册商处将DNS修改为：<code>f1g1ns1.dnspod.net</code>、<code>f1g1ns2.dnspod.net</code></p>
+<p> <img src="https://i.loli.net/2018/08/12/5b6f40f3cdb42.png" alt></p>
+</li>
+<li><p>然后在 <code>腾讯云</code> 的域名控制台中，为域名 <a href="http://www.wangmaoxian.com">www.wangmaoxian.com</a> 添加2条 <code>CNAME</code> 记录，分别指向<code>coding page</code> 和 <code>github page</code> ，线路分别选择国内和国外。<br> <img src="https://i.loli.net/2018/08/12/5b6f3bfe72e66.png" alt></p>
+</li>
+<li><p>分别在 <code>coding page</code> 和 <code>github page</code> 的项目中创建一个测试页面并提交。<br> <img src="https://i.loli.net/2018/08/12/5b6f3d8d5d608.png" alt></p>
+</li>
+<li><p>使用<strong>国内线路</strong>访问 <a href="http://www.wangmaoxian.com">www.wangmaoxian.com</a> 的效果<br> <img src="https://i.loli.net/2018/08/12/5b6f3e257ed2b.png" alt></p>
+</li>
+<li><p>使用<strong>国外线路</strong>访问 <a href="http://www.wangmaoxian.com">www.wangmaoxian.com</a> 的效果<br> <img src="https://i.loli.net/2018/08/12/5b6f3e8d9ad4e.png" alt></p>
+</li>
+</ol>
+<div class="note info"><h3 id="实现电信和联通的网络访问加速"><a href="#实现电信和联通的网络访问加速" class="headerlink" title="实现电信和联通的网络访问加速"></a>实现电信和联通的网络访问加速</h3></div>
+<ul>
+<li>到域名控制台中将 <a href="http://www.wangmaoxian.com">www.wangmaoxian.com</a> 的线路分别改为电信和联通</li>
+<li>这里我的手机是电信和联通双卡，分别使用切换流量进行访问，结果如下：<br><img src="https://ws1.sinaimg.cn/mw690/992aea3dgy1fu6exi6u7gj20g006n3yq.jpg" alt><br><img src="https://ws1.sinaimg.cn/mw690/992aea3dgy1fu6exi6sd3j20fz06pmxd.jpg" alt></li>
+</ul>
+<div class="note primary"><h3 id="还在等什么呢，赶紧去加速吧。。。"><a href="#还在等什么呢，赶紧去加速吧。。。" class="headerlink" title="还在等什么呢，赶紧去加速吧。。。"></a>还在等什么呢，赶紧去加速吧。。。</h3></div>]]></content>
+  </entry>
+  <entry>
+    <title>Gitlab Pages 使用自定义域名和https</title>
+    <url>/201910/gitlab-page-%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9F%9F%E5%90%8D%E5%92%8Chttps/</url>
+    <content><![CDATA[<h3 id="开启属于你的-Gitlab-Pages"><a href="#开启属于你的-Gitlab-Pages" class="headerlink" title="开启属于你的 Gitlab Pages"></a>开启属于你的 Gitlab Pages</h3><ol>
+<li>首先你得有一个 gitlab 账号，没有请到 <a href="https://gitlab.com/users/sign_in" target="_blank" rel="noopener">Gitlab</a> 申请。</li>
+<li>到这个页面 <a href="https://gitlab.com/pages" target="_blank" rel="noopener">https://gitlab.com/pages</a> 选择一个项目作为模板，例如 <code>Hexo</code> ， 点击 <code>Fork</code> 。</li>
+<li>这时你的 <code>projects</code> 中就创建了一个 <code>Hexo</code> 的副本。</li>
+<li>进入你的项目，点击 <code>设置</code> –&gt; <code>Advanced settings</code>  找到 <code>Remove fork relationship</code> 删除 <code>fork</code> 关系。<br><img src="https://i.loli.net/2018/08/11/5b6e88e784c31.png" alt></li>
+<li>找到 <code>Rename repository</code>设置为自己的 <code>namespace.gitlab.io</code><br><img src="https://i.loli.net/2018/08/11/5b6e89330f426.png" alt></li>
+<li>进入你的项目点击 <code>设置</code> –&gt; <code>CI/CD</code>，开启共享 <code>Runner</code><br><img src="https://i.loli.net/2018/08/11/5b6e89be41372.png" alt></li>
+<li><p>点击 <code>CI/CD</code> ，点击 <code>Run Pipline</code> ，这里会根据项目中的 <code>.gitlab-ci.yml</code> 文件进行部署<br><img src="https://i.loli.net/2018/08/11/5b6e8aa1ed541.png" alt><br><img src="https://i.loli.net/2018/08/11/5b6e8abe2b224.png" alt></p>
+</li>
+<li><p>故障排除：通过浏览器访问 <code>namespace.gitlab.io</code>，这里缺少 CSS 样式<br> <img src="https://i.loli.net/2018/08/11/5b6e8e852730b.png" alt><br> 修改项目中的 <code>_config.yml</code> 文件，修改提交后，会重新运行，右上角会有图标显示，等运行完后，即可正常访问<br> <img src="https://i.loli.net/2018/08/11/5b6e8a6e80ab1.png" alt><br> <img src="https://i.loli.net/2018/08/11/5b6e8ea9b9bb6.png" alt></p>
+</li>
+</ol>
+<p>最后可以将你的hexo项目clone到本地，进行修改后提交。</p>
+<p>相关参考文档：<br><a href="https://docs.gitlab.com/ee/user/project/pages/index.html" target="_blank" rel="noopener">https://docs.gitlab.com/ee/user/project/pages/index.html</a><br><a href="https://about.gitlab.com/features/pages/" target="_blank" rel="noopener">https://about.gitlab.com/features/pages/</a><br><a href="https://gitlab.com/pages/hexo" target="_blank" rel="noopener">https://gitlab.com/pages/hexo</a></p>
+<h3 id="申请-SSL-证书"><a href="#申请-SSL-证书" class="headerlink" title="申请 SSL 证书"></a>申请 SSL 证书</h3><ol>
+<li><p>免费的域名证书申请平台：</p>
+<ul>
+<li><a href="https://freessl.org" target="_blank" rel="noopener">https://freessl.org</a></li>
+<li><a href="https://letsencrypt.org" target="_blank" rel="noopener">https://letsencrypt.org</a></li>
+<li>腾讯云、百度云（龟速，慎用）</li>
+</ul>
+</li>
+<li><p><code>freessl.org</code> 操作比较简单，适合入门<br><img src="https://ws1.sinaimg.cn/large/992aea3dly1fu5brlv2s0j20ns0b0mzu.jpg" alt><br><img src="https://ws1.sinaimg.cn/large/992aea3dly1fu5btj3yfzj20ob0cs0vn.jpg" alt></p>
+</li>
+<li><p>点击创建后，会让你到域名控制台，建一个类型为 <code>TXT</code> 的解析，验证通过后会生成 <code>CA证书</code> <code>证书公钥</code> 以及 <code>私钥</code>，注意，一定要将私钥用文本保存下来，谨防丢失。</p>
+</li>
+<li>最后可以到控制台将证书下载下来保存。</li>
+<li>最终的访问效果<br><img src="https://ws1.sinaimg.cn/large/992aea3dgy1fu5c2dlr1ij20ey08n74i.jpg" alt></li>
+</ol>
+<blockquote>
+<p>特别说明：国内的网络访问 <code>gitlab Pages</code> 可能会出现无法访问的情况，需要通过一些特殊方式。</p>
+</blockquote>
+<h3 id="绑定自定义域名"><a href="#绑定自定义域名" class="headerlink" title="绑定自定义域名"></a>绑定自定义域名</h3><ol>
+<li>点击 设置 –&gt; <code>Pages</code> –&gt; <code>New Domain</code>，填写自己的域名和证书信息。<br><img src="https://i.loli.net/2018/08/11/5b6e8c81245cc.png" alt></li>
+<li><p>到你的域名控制台，添加两条记录<br> CNAME  <code>namespace.gitlab.ui</code><br> TXT 提供的 <code>Verification status</code></p>
+<p> <img src="https://i.loli.net/2018/08/11/5b6e8c31d6ddb.png" alt><br> 修改完后点击重新验证按钮<br> <img src="https://i.loli.net/2018/08/11/5b6e8cb64b79e.png" alt></p>
+</li>
+<li>点击 设置 –&gt; <code>Pages</code> ，能看到如下信息<br><img src="https://i.loli.net/2018/08/11/5b6e8d1f1e99e.png" alt></li>
+<li><p>最后通过自定义域名镜像访问。</p>
+<blockquote>
+<p>这里遇到一个问题，浏览器显示的证书并不是我申请的证书，我弄了半天也没弄好。<br> 不用担心，大概等一个小时，等gitlab通过后，访问的就是自己的证书</p>
+</blockquote>
+<p> <img src="https://i.loli.net/2018/08/11/5b6e8d8b8a1d1.png" alt><br> <img src="https://i.loli.net/2018/08/11/5b6e9133a6289.png" alt></p>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>Gitlab pages</tag>
+        <tag>https</tag>
+        <tag>ssl证书</tag>
+        <tag>自定义域名</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Github Pages 使用自定义域名和https</title>
+    <url>/201910/github-page-%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9F%9F%E5%90%8D%E5%92%8Chttps/</url>
+    <content><![CDATA[<h3 id="开启属于你的-Github-Pages"><a href="#开启属于你的-Github-Pages" class="headerlink" title="开启属于你的 Github Pages"></a>开启属于你的 Github Pages</h3><ol>
+<li>首先你得有一个 github 账号，没有请到 <a href="https://github.com" target="_blank" rel="noopener">Github</a> 申请。</li>
+<li>在 github 新建一个 <code>repository</code>，名字为 <code>username.docker.io</code>，<code>username</code>为你自己的 github 账号，如图：<br><img src="https://i.loli.net/2018/08/11/5b6df6d8eb926.png" alt></li>
+<li>添加一个 <code>index.html</code> 随便写一点内容测试，当然你也可以上传自己的页面。<br><img src="https://ws1.sinaimg.cn/large/992aea3dgy1fu59v9tnyfj20hi0650su.jpg" alt></li>
+<li>打开浏览器访问 <code>username.github.io</code> 应该会出现你的页面。</li>
+</ol>
+<h3 id="绑定自定义域名"><a href="#绑定自定义域名" class="headerlink" title="绑定自定义域名"></a>绑定自定义域名</h3><ol>
+<li>点击 <code>Settings</code>，找到 <code>GitHub Pages</code> 选项，在 <code>Custom domain</code>  中填写你的域名，比如：<a href="http://www.wangmaoxian.com">www.wangmaoxian.com</a></li>
+<li><p>到你的域名控制台，将你的域名解析到 <code>username.github.io</code>。</p>
+<ul>
+<li>这里要注意的是，如果绑定的是顶级域名，记录类型 必须为 <code>ALIAS</code> , <code>ANAME</code> 或 <code>A</code>，如果是子域名（包括www）则记录类型为 <code>CNAME</code> 。</li>
+<li><p>一般解析后不会立刻生效，你可以试着 <code>ping</code> 一下，如果是跟你 <code>ping username.github.io</code> 的 IP 一致，则说明解析生效。</p>
+<p><img src="https://ws1.sinaimg.cn/large/992aea3dly1fu5au62citj20ke07sdh8.jpg" alt></p>
+</li>
+</ul>
+</li>
+<li><p>打开浏览器访问你的域名，应该会出现你的页面。<br> <img src="https://ws1.sinaimg.cn/large/992aea3dly1fu5aw5h0utj20fw063weg.jpg" alt></p>
+</li>
+</ol>
+<h3 id="申请-SSL-证书"><a href="#申请-SSL-证书" class="headerlink" title="申请 SSL 证书"></a>申请 SSL 证书</h3><ol>
+<li><p>免费的域名证书申请平台：</p>
+<ul>
+<li><a href="https://freessl.org" target="_blank" rel="noopener">https://freessl.org</a></li>
+<li><a href="https://letsencrypt.org" target="_blank" rel="noopener">https://letsencrypt.org</a></li>
+<li>腾讯云、百度云（龟速，慎用）</li>
+</ul>
+</li>
+<li><p><code>freessl.org</code> 操作比较简单，适合入门<br><img src="https://ws1.sinaimg.cn/large/992aea3dly1fu5brlv2s0j20ns0b0mzu.jpg" alt><br><img src="https://ws1.sinaimg.cn/large/992aea3dly1fu5btj3yfzj20ob0cs0vn.jpg" alt></p>
+</li>
+<li><p>点击创建后，会让你到域名控制台，建一个类型为 <code>TXT</code> 的解析，验证通过后会生成 <code>CA证书</code> <code>证书公钥</code> 以及 <code>私钥</code>，注意，一定要将私钥用文本保存下来，谨防丢失。</p>
+</li>
+<li>最后可以到控制台将证书下载下来保存。</li>
+<li>最终的访问效果<br><img src="https://ws1.sinaimg.cn/large/992aea3dgy1fu5c2dlr1ij20ey08n74i.jpg" alt></li>
+</ol>
+<div class="note warning"><p><strong>特别说明：</strong>国内的网络访问 <code>Github Pages</code> 可能会出现无法访问的情况，需要通过一些特殊方式。</p></div>]]></content>
+      <tags>
+        <tag>https</tag>
+        <tag>ssl证书</tag>
+        <tag>github pages</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>nmcli 命令使用</title>
+    <url>/201910/linux-command-nmcli-nmtui/</url>
+    <content><![CDATA[<div class="note info"><h3 id="nmcli-命令说明"><a href="#nmcli-命令说明" class="headerlink" title="nmcli 命令说明"></a>nmcli 命令说明</h3></div>
+<p><code>nmcli</code> 命令是用于控制 <code>NetworkManager</code> 的命令行工具</p>
+<div class="note info"><h3 id="常见用法"><a href="#常见用法" class="headerlink" title="常见用法"></a>常见用法</h3></div>
+<h4 id="子命令-connection"><a href="#子命令-connection" class="headerlink" title="子命令 connection"></a>子命令 <code>connection</code></h4><ul>
+<li><p><code>show</code>：查看</p>
+  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# nmcli connection show</span><br><span class="line">NAME   UUID                                  TYPE      DEVICE </span><br><span class="line">ens33  92b21e34-1611-4ed2-aa3c-26716b5ccb21  ethernet  ens33</span><br><span class="line">[root@RS1 ~]#</span><br><span class="line">[root@RS1 ~]# nmcli connection show ens33 | grep ipv4.*</span><br><span class="line">ipv4.method:                            manual</span><br><span class="line">ipv4.addresses:                         192.168.20.13/24</span><br><span class="line">ipv4.gateway:                           192.168.20.2</span><br><span class="line">ipv4.dns:                               192.168.20.2</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>modify</code>：修改</p>
+  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# nmcli connection modify ens33 ipv4.method manual ipv4.addresses 192.168.20.13/24 ipv4.gateway 192.168.20.2 ipv4.dns 192.168.20.2</span><br><span class="line">[root@RS1 ~]# nmcli connection up ens33</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>edit</code>：交互式编辑器</p>
+  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# nmcli connection edit ens33 </span><br><span class="line">===| nmcli 交互式连接编辑器 |===</span><br><span class="line"></span><br><span class="line">正在编辑已存的连接“802-3-ethernet”：“ens33”</span><br><span class="line"></span><br><span class="line">对于可用的命令输入“help”或“?”。</span><br><span class="line">输入“describe [&lt;设置&gt;.&lt;属性&gt;]”来获得详细的属性描述。</span><br><span class="line"></span><br><span class="line">您可编辑下列设置：connection, 802-3-ethernet (ethernet), 802-1x, dcb, ipv4, ipv6, tc, proxy</span><br><span class="line">nmcli&gt; help</span><br><span class="line">------------------------------------------------------------------------------</span><br><span class="line">---[ Main menu ]---</span><br><span class="line">goto     [&lt;setting&gt; | &lt;prop&gt;]        :: go to a setting or property</span><br><span class="line">remove   &lt;setting&gt;[.&lt;prop&gt;] | &lt;prop&gt; :: remove setting or reset property value</span><br><span class="line">set      [&lt;setting&gt;.&lt;prop&gt; &lt;value&gt;]  :: set property value</span><br><span class="line">describe [&lt;setting&gt;.&lt;prop&gt;]          :: describe property</span><br><span class="line">print    [all | &lt;setting&gt;[.&lt;prop&gt;]]  :: print the connection</span><br><span class="line">verify   [all | fix]                 :: verify the connection</span><br><span class="line">save     [persistent|temporary]      :: save the connection</span><br><span class="line">activate [&lt;ifname&gt;] [/&lt;ap&gt;|&lt;nsp&gt;]    :: activate the connection</span><br><span class="line">back                                 :: go one level up (back)</span><br><span class="line">help/?   [&lt;command&gt;]                 :: print this help</span><br><span class="line">nmcli    &lt;conf-option&gt; &lt;value&gt;       :: nmcli configuration</span><br><span class="line">quit                                 :: exit nmcli</span><br><span class="line">------------------------------------------------------------------------------</span><br><span class="line">nmcli&gt; print ipv4.dns</span><br><span class="line">ipv4.dns: 192.168.20.2</span><br><span class="line">nmcli&gt; set ipv4.dns</span><br><span class="line">输入“dns”值：172.16.1.1</span><br><span class="line">nmcli&gt; print ipv4.dns </span><br><span class="line">ipv4.dns: 192.168.20.2,172.16.1.1</span><br><span class="line">nmcli&gt; save</span><br><span class="line">成功地更新了连接 &apos;ens33&apos;（92b21e34-1611-4ed2-aa3c-26716b5ccb21）。</span><br><span class="line">nmcli&gt; quit</span><br><span class="line"></span><br><span class="line">[root@RS1 ~]# nmcli connection up ens33</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>其它用法说明</p>
+  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# nmcli connection --help</span><br><span class="line">Usage: nmcli connection &#123; COMMAND | help &#125;</span><br><span class="line"></span><br><span class="line">COMMAND := &#123; show | up | down | add | modify | clone | edit | delete | monitor | reload | load | import | export &#125;</span><br><span class="line"></span><br><span class="line">show [--active] [--order &lt;order spec&gt;]</span><br><span class="line">show [--active] [id | uuid | path | apath] &lt;ID&gt; ...</span><br><span class="line"></span><br><span class="line">up [[id | uuid | path] &lt;ID&gt;] [ifname &lt;ifname&gt;] [ap &lt;BSSID&gt;] [passwd-file &lt;file with passwords&gt;]</span><br><span class="line"></span><br><span class="line">down [id | uuid | path | apath] &lt;ID&gt; ...</span><br><span class="line"></span><br><span class="line">add COMMON_OPTIONS TYPE_SPECIFIC_OPTIONS SLAVE_OPTIONS IP_OPTIONS [-- ([+|-]&lt;setting&gt;.&lt;property&gt; &lt;value&gt;)+]</span><br><span class="line"></span><br><span class="line">modify [--temporary] [id | uuid | path] &lt;ID&gt; ([+|-]&lt;setting&gt;.&lt;property&gt; &lt;value&gt;)+</span><br><span class="line"></span><br><span class="line">clone [--temporary] [id | uuid | path ] &lt;ID&gt; &lt;new name&gt;</span><br><span class="line"></span><br><span class="line">edit [id | uuid | path] &lt;ID&gt;</span><br><span class="line">edit [type &lt;new_con_type&gt;] [con-name &lt;new_con_name&gt;]</span><br><span class="line"></span><br><span class="line">delete [id | uuid | path] &lt;ID&gt;</span><br><span class="line"></span><br><span class="line">monitor [id | uuid | path] &lt;ID&gt; ...</span><br><span class="line"></span><br><span class="line">reload</span><br><span class="line"></span><br><span class="line">load &lt;filename&gt; [ &lt;filename&gt;... ]</span><br><span class="line"></span><br><span class="line">import [--temporary] type &lt;type&gt; file &lt;file to import&gt;</span><br><span class="line"></span><br><span class="line">export [id | uuid | path] &lt;ID&gt; [&lt;output file&gt;]</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="子命令-device"><a href="#子命令-device" class="headerlink" title="子命令 device"></a>子命令 <code>device</code></h4><p>使用方法与 <code>connection</code> 类似</p>
+<ul>
+<li><p><code>show</code>： 查看</p>
+  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# nmcli device show</span><br><span class="line">GENERAL.DEVICE:                         ens33</span><br><span class="line">GENERAL.TYPE:                           ethernet</span><br><span class="line">GENERAL.HWADDR:                         00:0C:29:C8:6C:B0</span><br><span class="line">GENERAL.MTU:                            1500</span><br><span class="line">GENERAL.STATE:                          100 (连接的)</span><br><span class="line">GENERAL.CONNECTION:                     ens33</span><br><span class="line">GENERAL.CON-PATH:                       /org/freedesktop/NetworkManager/ActiveConnection/9</span><br><span class="line">WIRED-PROPERTIES.CARRIER:               开</span><br><span class="line">IP4.ADDRESS[1]:                         192.168.20.13/24</span><br><span class="line">IP4.GATEWAY:                            192.168.20.2</span><br><span class="line">IP4.ROUTE[1]:                           dst = 192.168.20.0/24, nh = 0.0.0.0, mt = 100</span><br><span class="line">IP4.ROUTE[2]:                           dst = 0.0.0.0/0, nh = 192.168.20.2, mt = 100</span><br><span class="line">IP4.DNS[1]:                             192.168.20.2</span><br><span class="line">IP4.DNS[2]:                             172.16.1.1</span><br><span class="line">IP6.ADDRESS[1]:                         fe80::20c:29ff:fec8:6cb0/64</span><br><span class="line">IP6.GATEWAY:                            --</span><br><span class="line">IP6.ROUTE[1]:                           dst = ff00::/8, nh = ::, mt = 256, table=255</span><br><span class="line">IP6.ROUTE[2]:                           dst = fe80::/64, nh = ::, mt = 256</span><br><span class="line"></span><br><span class="line">GENERAL.DEVICE:                         lo</span><br><span class="line">GENERAL.TYPE:                           loopback</span><br><span class="line">GENERAL.HWADDR:                         00:00:00:00:00:00</span><br><span class="line">GENERAL.MTU:                            65536</span><br><span class="line">GENERAL.STATE:                          10 (未托管)</span><br><span class="line">GENERAL.CONNECTION:                     --</span><br><span class="line">GENERAL.CON-PATH:                       --</span><br><span class="line">IP4.ADDRESS[1]:                         127.0.0.1/8</span><br><span class="line">IP4.GATEWAY:                            --</span><br><span class="line">IP6.ADDRESS[1]:                         ::1/128</span><br><span class="line">IP6.GATEWAY:                            --</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>modify</code>：修改</p>
+  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# nmcli device modify ens33 ipv4.dns 8.8.8.8</span><br><span class="line">[root@RS1 ~]# nmcli device show ens33 | grep IP4.DNS</span><br><span class="line">IP4.DNS[1]:                             8.8.8.8</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>更多用法说明</p>
+  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# nmcli device --help</span><br><span class="line">Usage: nmcli device &#123; COMMAND | help &#125;</span><br><span class="line"></span><br><span class="line">COMMAND := &#123; status | show | set | connect | reapply | modify | disconnect | delete | monitor | wifi | lldp &#125;</span><br><span class="line"></span><br><span class="line">status</span><br><span class="line"></span><br><span class="line">show [&lt;ifname&gt;]</span><br><span class="line"></span><br><span class="line">set [ifname] &lt;ifname&gt; [autoconnect yes|no] [managed yes|no]</span><br><span class="line"></span><br><span class="line">connect &lt;ifname&gt;</span><br><span class="line"></span><br><span class="line">reapply &lt;ifname&gt;</span><br><span class="line"></span><br><span class="line">modify &lt;ifname&gt; ([+|-]&lt;setting&gt;.&lt;property&gt; &lt;value&gt;)+</span><br><span class="line"></span><br><span class="line">disconnect &lt;ifname&gt; ...</span><br><span class="line"></span><br><span class="line">delete &lt;ifname&gt; ...</span><br><span class="line"></span><br><span class="line">monitor &lt;ifname&gt; ...</span><br><span class="line"></span><br><span class="line">wifi [list [ifname &lt;ifname&gt;] [bssid &lt;BSSID&gt;]]</span><br><span class="line"></span><br><span class="line">wifi connect &lt;(B)SSID&gt; [password &lt;password&gt;] [wep-key-type key|phrase] [ifname &lt;ifname&gt;]</span><br><span class="line">                        [bssid &lt;BSSID&gt;] [name &lt;name&gt;] [private yes|no] [hidden yes|no]</span><br><span class="line"></span><br><span class="line">wifi hotspot [ifname &lt;ifname&gt;] [con-name &lt;name&gt;] [ssid &lt;SSID&gt;] [band a|bg] [channel &lt;channel&gt;] [password &lt;password&gt;]</span><br><span class="line"></span><br><span class="line">wifi rescan [ifname &lt;ifname&gt;] [[ssid &lt;SSID to scan&gt;] ...]</span><br><span class="line"></span><br><span class="line">lldp [list [ifname &lt;ifname&gt;]]</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<div class="note info"><h3 id="nmtui-命令"><a href="#nmtui-命令" class="headerlink" title="nmtui 命令"></a>nmtui 命令</h3></div>
+<p><code>nmcli</code> 命令是用于控制 <code>NetworkManager</code> 的图形化工具，不多说上个图。</p>
+<p><img src="https://i.loli.net/2018/11/02/5bdbc639c1857.png" alt="nmtui1"><br><img src="https://i.loli.net/2018/11/02/5bdbc64786bb7.png" alt="nmtui2"><br><img src="https://i.loli.net/2018/11/02/5bdbc657a7984.png" alt="nmtui3"><br><img src="https://i.loli.net/2018/11/02/5bdbc6646bbe5.png" alt="nmtui4"></p>
+<p>3个功能对应的命令分别为：<code>nmtui-edit</code>、<code>nmtui-connect</code>、<code>nmtui-hostname</code></p>
+]]></content>
+      <tags>
+        <tag>nmcli</tag>
+        <tag>nmtui</tag>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Ubuntu 16.04 开启 Docker 远程访问</title>
+    <url>/201910/docker-remote-ubuntu1604/</url>
+    <content><![CDATA[<div class="note info"><h3 id="软件版本说明"><a href="#软件版本说明" class="headerlink" title="软件版本说明"></a>软件版本说明</h3></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">soft</th>
+<th style="text-align:left">version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">OS</td>
+<td style="text-align:left">Ubuntu 16.04</td>
+</tr>
+<tr>
+<td style="text-align:left">docker</td>
+<td style="text-align:left">18.06.1-ce</td>
+</tr>
+<tr>
+<td style="text-align:left">portainer</td>
+<td style="text-align:left">1.19.2</td>
+</tr>
+</tbody>
+</table>
+<div class="note info"><h3 id="Docker-远程说明"><a href="#Docker-远程说明" class="headerlink" title="Docker 远程说明"></a>Docker 远程说明</h3></div>
+<blockquote>
+<p>默认情况下，<code>Docker</code> 通过守护进程 <code>Unix socket (/var/run/docker.sock)</code> 来进行本地进程通信，而不会监听任何端口，因此只能在本地使用 <code>docker客户端</code> 或者使用 <code>Docker API</code> 进行操作。<br>如果想在其他主机上操作 <code>Docker主机</code> ，就需要让 <code>Docker守护进程</code> 打开一个 <code>HTTP Socket</code> ，这样才能实现远程通信。</p>
+</blockquote>
+<div class="note info"><h3 id="网上找的一些方法"><a href="#网上找的一些方法" class="headerlink" title="网上找的一些方法"></a>网上找的一些方法</h3></div>
+<blockquote>
+<p><em>说明 fd:// 相当于 unix:///var/run/docker.sock</em></p>
+</blockquote>
+<ol>
+<li><p>修改 <code>/etc/default/docker</code> 文件的 <code>DOCKER_OPTS</code> ，测试无效。</p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">DOCKER_OPTS=<span class="string">"-H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改 <code>/etc/docker/daemon.json</code> ，测试无效。</p>
+ <figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"hosts"</span>: [<span class="string">"fd://"</span>, <span class="string">"tcp://0.0.0.0:2375"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改 <code>/lib/systemd/system/docker.service</code>，测试<strong>通过</strong>。</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375</span><br></pre></td></tr></table></figure>
+<p> <img src="https://i.loli.net/2018/10/11/5bbecdcc822d9.png" alt="docker_daemon"></p>
+<p> 重新启动 <code>Docker</code></p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker.service</span><br></pre></td></tr></table></figure>
+<p> 查看本地端口 2375 是否开启</p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">root@ubuntu:/<span class="comment"># netstat -plnt |grep 2375</span></span><br><span class="line">tcp6    0    0 :::2375        :::*            LISTEN    22615/dockerd</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<div class="note info"><h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3></div>
+<blockquote>
+<p>使用另一台 docker 设备进行连接<br><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">root@ubuntu-virtual-machine:/<span class="comment"># docker images</span></span><br><span class="line">REPOSITORY                      TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">hwdsl2/ipsec-vpn-server         latest              11dd0aafd0ff        6 weeks ago         203MB</span><br><span class="line">jenkinsci/blueocean             1.8.2               275adfc8efff        6 weeks ago         443MB</span><br><span class="line">ubuntu                          18.04               16508e5c265d        6 weeks ago         84.1MB</span><br><span class="line">jenkins/jenkins                 lts                 74c174cc8e36        7 weeks ago         700MB</span><br><span class="line">sonarqube                       7.1                 301e57279977        8 weeks ago         803MB</span><br><span class="line">portainer/portainer             1.19.1              6827bc26a94d        2 months ago        58.5MB</span><br><span class="line">gitlab/gitlab-ce                11.1.0-rc14.ce.0    94683ff3204a        2 months ago        1.46GB</span><br><span class="line">jenkins                         2.60.3              cd14cecfdb3a        2 months ago        696MB</span><br><span class="line">fcojean/l2tp-ipsec-vpn-server   latest              c95b26c46285        5 months ago        369MB</span><br><span class="line">mysql                           5.7.21              5195076672a7        7 months ago        371MB</span><br><span class="line"></span><br><span class="line">root@ubuntu-virtual-machine:/<span class="comment"># docker -H 172.16.1.178:2375 images</span></span><br><span class="line">REPOSITORY             TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">webdevops/php-apache   5.6                 5c50b4e67615        18 hours ago        707MB</span><br><span class="line">webdevops/php-apache   latest              6b00108124ac        18 hours ago        503MB</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<div class="note info"><h3 id="Portainer-添加远程-Docker"><a href="#Portainer-添加远程-Docker" class="headerlink" title="Portainer 添加远程 Docker"></a>Portainer 添加远程 Docker</h3></div>
+<p><img src="https://i.loli.net/2018/10/11/5bbecec186eb5.png" alt="portainer1"><br><img src="https://i.loli.net/2018/10/11/5bbeced3f08e3.png" alt="portainer2"><br><img src="https://i.loli.net/2018/10/11/5bbecedf6cdd1.png" alt="portainer3"></p>
+]]></content>
+      <tags>
+        <tag>ubuntu</tag>
+        <tag>docker</tag>
+        <tag>portainer</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Centos 安装 Docker 指定版本</title>
+    <url>/201910/centos-installs-the-specified-version-of-docker/</url>
+    <content><![CDATA[<p>docker 目前的最高版本为 18.09, 而k8s 1.14 版本已验证的最高版本为 18.06，为此我们需要安装的docker 版本为 18.06<br><div class="note info"><h3 id="安装指定版本docker"><a href="#安装指定版本docker" class="headerlink" title="安装指定版本docker"></a>安装指定版本docker</h3></div></p>
+<ol>
+<li><p>下载阿里云镜像站的<code>docker-ce.repo</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget -O /etc/yum.repos.d/docker-ce.repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看版本列表</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# yum list docker-ce --showduplicates</span><br><span class="line">已加载插件：fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line">已安装的软件包</span><br><span class="line">docker-ce.x86_64                              17.03.2.ce-1.el7.centos                               @docker-ce-stable</span><br><span class="line">可安装的软件包</span><br><span class="line">docker-ce.x86_64                              17.03.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.03.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.03.2.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.03.3.ce-1.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.06.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.06.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.06.2.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.09.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.09.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.12.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.12.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.03.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.03.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.06.0.ce-3.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.06.1.ce-3.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.06.2.ce-3.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.06.3.ce-3.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.0-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.1-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.2-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.3-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.4-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.5-3.el7                                       docker-ce-stable</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装指定版本的docker</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>验证docker版本</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# docker version</span><br><span class="line">Client:</span><br><span class="line"> Version:           18.06.3-ce</span><br><span class="line"> API version:       1.38</span><br><span class="line"> Go version:        go1.10.3</span><br><span class="line"> Git commit:        d7080c1</span><br><span class="line"> Built:             Wed Feb 20 02:26:51 2019</span><br><span class="line"> OS/Arch:           linux/amd64</span><br><span class="line"> Experimental:      false</span><br><span class="line"></span><br><span class="line">Server:</span><br><span class="line"> Engine:</span><br><span class="line">  Version:          18.06.3-ce</span><br><span class="line">  API version:      1.38 (minimum version 1.12)</span><br><span class="line">  Go version:       go1.10.3</span><br><span class="line">  Git commit:       d7080c1</span><br><span class="line">  Built:            Wed Feb 20 02:28:17 2019</span><br><span class="line">  OS/Arch:          linux/amd64</span><br><span class="line">  Experimental:     false</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<div class="note info"><h3 id="升级到指定版本-docker"><a href="#升级到指定版本-docker" class="headerlink" title="升级到指定版本 docker"></a>升级到指定版本 docker</h3></div>
+<ol>
+<li><p>查看docker版本，当前版本为 17.03.2-ce</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# docker -v</span><br><span class="line">Docker version 17.03.2-ce, build f5ec1e2</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>列出docker-ce版本列表</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# yum list docker-ce --showduplicates</span><br><span class="line">已加载插件：fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line">已安装的软件包</span><br><span class="line">docker-ce.x86_64                              17.03.2.ce-1.el7.centos                               @docker-ce-stable</span><br><span class="line">可安装的软件包</span><br><span class="line">docker-ce.x86_64                              17.03.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.03.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.03.2.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.03.3.ce-1.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.06.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.06.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.06.2.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.09.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.09.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.12.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              17.12.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.03.0.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.03.1.ce-1.el7.centos                               docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.06.0.ce-3.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.06.1.ce-3.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.06.2.ce-3.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              18.06.3.ce-3.el7                                      docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.0-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.1-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.2-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.3-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.4-3.el7                                       docker-ce-stable </span><br><span class="line">docker-ce.x86_64                              3:18.09.5-3.el7                                       docker-ce-stable</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>升级到 18.06.3-ce</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum update docker-ce-18.06.3.ce-3.el7</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>验证版本</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[root@RS1 ~]# docker -v</span><br><span class="line">Docker version 18.06.3-ce, build d7080c1</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <tags>
+        <tag>Dicker</tag>
+        <tag>安装</tag>
+        <tag>升级</tag>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CentOS 命令补全增强</title>
+    <url>/201910/centos-bash-completion-expansion/</url>
+    <content><![CDATA[<blockquote>
+<p>最小化安装的CentOS 补全功能非常的弱，可安装 <code>bash-completion</code> 进行增强。</p>
+</blockquote>
+<h3 id="CentOS7"><a href="#CentOS7" class="headerlink" title="CentOS7"></a>CentOS7</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum -y install bash-completion</span><br></pre></td></tr></table></figure>
+<h3 id="CentOS6"><a href="#CentOS6" class="headerlink" title="CentOS6"></a>CentOS6</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">rpm -ivh https://mirrors.aliyun.com/epel/epel-release-latest-6.noarch.rpm</span><br><span class="line">yum -y install bash-completion</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>centos</tag>
+        <tag>命令补全</tag>
+        <tag>bash-completion</tag>
+      </tags>
+  </entry>
+</search>
